@@ -1,0 +1,15 @@
+slug: pilot-app
+name: pilot-app 试点
+repos:
+  - https://github.com/adult-KFC/pilot-app.git
+owners:
+  - zhooy123@foxmail.com
+default_branch: main
+current_version: 0.1.0
+version_status: active
+context_budget_chars: 12000
+maintenance:
+  interval_hours: 72
+  cooldown_hours: 6
+  mainline_only: true
+created: 2026-11-14
