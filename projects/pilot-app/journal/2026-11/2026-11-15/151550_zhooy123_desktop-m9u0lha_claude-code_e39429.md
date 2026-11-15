@@ -28,7 +28,11 @@ summary_source: derived
 - 15:28 [decision] 图书销售系统需求范围确认：MVP 含用户/图书/购物车/订单/库存/支付(模拟)/秒杀/后台管理；秒杀为必须场景，峰值下单 QPS 目标 1w；目标架构需 Redis、消息队列、分库分表；主语言 Java。
 - 15:31 [progress] 完成图书销售系统需求分析第一阶段：确认项目方向为图书销售（购买订单，非借阅单）；MVP 范围为用户/图书/购物车/订单/库存/支付(模拟)/秒杀/后台管理；明确秒杀为必须场景、峰值下单 QPS 目标 1w、架构需 Redis+消息队列+分库分表。已产出三个架构方案对比：A 模块化单体、B 完整微服务、C 模块化单体+秒杀独立服务（推荐 C），等待用户选定。
 - 18:34 [progress] 桌面机（DESKTOP-M9U0LHA）进度核对：已同步到笔记本会话成果——架构方案 C（模块化单体+秒杀独立服务）已确认，前端 Vue3、缓存 Redis、削峰 Kafka，峰值下单 QPS 1w；《需求与规范》文档按用户要求暂缓。应用仓仍为 583b6eb，无代码无文档。memsync status 当前正常（last sync 10:34Z，无待推送、未锁定），~/.memsync/repo 工作区干净，此前 default_branch 同步阻塞在当前检查中未见异常；旧待办中的架构方案确认项可视为已完成。
+- 18:56 [decision] 技术选型确认（2026-11-15）：Java 21、ORM 使用 MyBatis-Plus；《需求与规范》文档继续暂缓，待用户另行通知。
+- 18:57 [decision] 技术选型确认（2026-11-15）：Spring Boot 3.3、分库分表采用 ShardingSphere-JDBC；《需求与规范》文档继续暂缓。
+- 18:59 [progress] 技术选型进度汇总（2026-11-15）：已确认 Java 21、Spring Boot 3.3、MyBatis-Plus、ShardingSphere-JDBC 分库分表、Redis、Kafka、Vue 3；架构方案 C（模块化单体+秒杀独立服务）；峰值下单 QPS 1w；《需求与规范》文档按用户要求暂缓，应用仓仍无代码无文档。
 
 ## 未完成 / 交接
 - [ ] 待完成：1) 用户确认架构方案 A/B/C（当前推荐 C 模块化单体+独立秒杀服务）；2) 确认后撰写《需求与规范》文档至 docs/superpowers/specs/2026-11-15-book-ecommerce-design.md，含功能需求、性能指标（峰值下单 QPS 1w）、并发与一致性约束、编码及工程规范；3) 文档审查通过后再制定实施计划。
 - [ ] 环境提示：memsync CLI 未加入 PATH，需用完整命令调用："E:/node.js/node.exe" "E:/Agent-memorySync/dist/memsync.mjs" note <kind> "..."（在项目根目录 e:/pilot-app 下执行）。
+- [ ] 待确认可选项：Sentinel 限流熔断、JUnit 5 + Testcontainers、JMeter/Gatling 压测工具；待撰写《需求与规范》文档（暂缓中）。
