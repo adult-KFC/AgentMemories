@@ -16,6 +16,7 @@ memsync/         MemorySync CLI 源码、文档、安装包
 
 - 同事使用说明：[memsync/docs/usage-for-team.md](memsync/docs/usage-for-team.md)
 - 项目历程：[memsync/docs/PROJECT_HISTORY.md](memsync/docs/PROJECT_HISTORY.md)
+- 脱敏对话记录：[memsync/docs/conversation-redacted.md](memsync/docs/conversation-redacted.md)
 - 设计文档：[memsync/docs/superpowers/specs/2026-11-13-shared-team-memory-design.md](memsync/docs/superpowers/specs/2026-11-13-shared-team-memory-design.md)
 - 安装包：[memsync/downloads/memsync-0.1.0.tgz](memsync/downloads/memsync-0.1.0.tgz)
 
