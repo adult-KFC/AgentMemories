@@ -79,21 +79,23 @@ memsync --version
 
 ```bash
 # 1. 克隆团队记忆仓库并写入身份
-memsync init --remote git@git.corp.com:team/memory.git \
+memsync init --remote git@git.corp.com:team/memory.git(存放记忆的仓库地址) \
   --name "你的名字" --email you@corp.com
 
 # 2. 在代码仓库中绑定项目（写 .memsync.json，建议提交）
-cd path/to/checkout-service
-memsync link checkout-service
+cd path/to/checkout-service（需要共同开发的项目地址和名称）
+memsync link checkout-service（共同开发的项目名称）
 
 # 3. 安装工具集成
 memsync install --tool claude-code
-memsync install --tool codex
+memsync install --tool codex --force-path B   # Windows/0.169：hooks 不可用，走 AGENTS.md + wrapper
 
 # 4. 自检与手动同步
 memsync doctor
 memsync sync
 ```
+
+Codex 的 `install --tool codex` 默认会探测并自动选择 A/A2/B。Windows Codex 0.169 的 command hooks 不可用，因此建议显式使用 `--force-path B`；路径 A/A2 只在经过真实 Codex 验证、command hooks 可用的环境启用。路径 B 下用 `memsync run codex` 启动，wrapper 负责沙箱外的同步与推送。
 
 `init` 只需要执行一次（换机器时再执行）。`link` 会在工作区写入 `.memsync.json`；把它提交到代码仓库后，队友无需重复指定 slug。
 
