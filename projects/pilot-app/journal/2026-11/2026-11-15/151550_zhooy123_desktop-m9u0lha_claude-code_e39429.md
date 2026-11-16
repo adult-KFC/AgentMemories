@@ -35,6 +35,7 @@ summary_source: derived
 - 12:58 [decision] 技术选型确认（2026-11-16）：限流熔断使用 Sentinel；测试使用 JUnit 5 + Testcontainers；压测使用 Gatling；《需求与规范》文档继续暂缓。
 - 13:06 [progress] 状态更正：再次执行 memsync sync 成功（synced 2026-11-16T05:06:24.758Z）；本地提交 0b13a9f/d0f5217/7a46a1e 已推送到 origin/main，远程 main=7a46a1e，pending push=no，同步阻塞解除。
 - 14:16 [progress] 完成《图书销售电商系统 需求与规范 v0.1》Q-1~Q-3 审评：Q-1 建议支持成功/失败/无回调三种模拟模式（仅 local/dev/staging，生产禁用）；Q-2 初稿「独立库存且不扣 book_stock」存在物理库存双卖，建议改为「独立账本 + 激活预占 + 结束释放」；Q-3 建议超时关单回补，但需按活动状态分流、统一幂等释放，并处理限购计数与 seckill_request 唯一键冲突。待用户确认后更新文档 v1.0。
+- 14:21 [progress] 《图书销售电商系统 需求与规范》更新至 v0.2：Q-1 支付模拟三模式（SUCCESS/FAIL/NO_CALLBACK）+ payment_record 多次支付记录；Q-2 秒杀独立账本 + 激活预占（新增 seckill_reservation、内部预占/释放接口、C-11/C-12）；Q-3 超时关单回补（活动进行中回秒杀池、结束后回 book_stock、幂等且不回退限购计数），并补 STOPPING 两阶段结束、支付回调 EXCEPTION 处理。Q-4~Q-10 仍待确认。
 
 ## 未完成 / 交接
 - [ ] 待完成：1) 用户确认架构方案 A/B/C（当前推荐 C 模块化单体+独立秒杀服务）；2) 确认后撰写《需求与规范》文档至 docs/superpowers/specs/2026-11-15-book-ecommerce-design.md，含功能需求、性能指标（峰值下单 QPS 1w）、并发与一致性约束、编码及工程规范；3) 文档审查通过后再制定实施计划。
