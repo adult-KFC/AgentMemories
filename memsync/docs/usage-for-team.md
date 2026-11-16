@@ -74,7 +74,9 @@ Identity: 你的姓名 <你的邮箱>
 Remote: https://github.com/adult-KFC/AgentMemories.git
 ```
 
-## 5. 接入 pilot-app
+## 5. 绑定需要共享记忆的项目（以 pilot-app 图书管理系统为例）
+
+以下以试点项目 `pilot-app`（图书管理系统）为例。实际接入时，把代码仓地址和 `pilot-app` 替换成你们自己的项目；`pilot-app` 是创建项目时指定的 slug，可在 `projects/<slug>/meta.yaml` 中看到。
 
 ```bat
 git clone https://github.com/adult-KFC/pilot-app.git
