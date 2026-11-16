@@ -15,11 +15,14 @@ commits: []
 files_changed: 0
 insertions: 0
 deletions: 0
-outcome: unknown
+outcome: blocked
 summary_source: derived
+ended: 2026-11-16T15:32:39+08:00
 ---
 
 ## 工作摘要
+
+本次会话存在阻塞，未完成（自动推导）。
 
 ## AI 记录
 - 14:59 [blocker] 2026-11-16 session: memsync sync --strict reached the CLI but remote pull failed with timeout. Local last sync is 2026-11-16T06:57:35.899Z; pending push: no.
