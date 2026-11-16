@@ -5,7 +5,7 @@
 ## 0. 前置条件
 
 - Node.js **>= 22**，推荐 **24**（`node --version`）。
-- Git 2.30+（`git --version`）。
+- Git 2.31+（`git --version`）。
 - 团队记忆仓库的读写权限；先在终端验证：
 
   ```bash
@@ -16,41 +16,50 @@
 
 ## 1. 安装 CLI
 
+### 安装包（推荐）
+
+从团队记忆仓库获取 `memsync/downloads/memsync-0.1.0.tgz`，然后：
+
 ```bash
-npm install -g memsync
+npm install -g <path-to>/memsync-0.1.0.tgz
 memsync --version
 ```
 
-从源码安装：
+安装包已经包含打包好的 `dist/memsync.mjs`，不需要 clone 或 build。
+
+> `npm install -g memsync` 不适用：当前没有发布到 npm registry。
+
+### 从源码（开发）
 
 ```bash
 git clone <repo>
-cd Agent-memorySync
+cd Agent-memorySync          # 从 AgentMemories 克隆时为 AgentMemories/memsync
 npm ci
 npm run build
-npm link
+npm install -g .             # 或 npm link
+memsync --version
 ```
 
-单文件 bundle 会安装到 `dist/memsync.mjs`；hooks 使用 Node 绝对路径 + CLI 绝对路径调用，不依赖 PATH。
+单文件 bundle 会生成到 `dist/memsync.mjs`；hooks 使用 Node 绝对路径 + CLI 绝对路径调用，不依赖 PATH。修改源码后需要重新 `npm run build`。
 
 ### Windows
 
 1. 安装 Node.js 24 LTS（`winget install OpenJS.NodeJS.LTS` 或 nodejs.org 安装包）。
 2. 安装 Git for Windows；推荐在 Git Bash 或 PowerShell 中操作。
-3. `npm install -g memsync`。全局 npm 目录默认不需要管理员权限；若遇到权限错误，改用 nvm-windows 或修复 npm prefix。
+3. `npm install -g <path-to>\memsync-0.1.0.tgz`。全局 npm 目录默认不需要管理员权限；若遇到权限错误，改用 nvm-windows 或修复 npm prefix。
 4. `memsync init` 会把记忆仓库的 `core.autocrlf` 固定为 `false`，并在仓库中提交 `.gitattributes`（`* text=auto eol=lf`），避免 CRLF 造成虚假 diff。
 5. hooks 中的命令是带引号的绝对路径；路径含空格也能工作。无需手动改 PATH。
 
 ### macOS
 
 1. 安装 Node 24：`brew install node@24`，或用 nvm/fnm。
-2. `npm install -g memsync`；使用 nvm 时不要加 `sudo`。
+2. `npm install -g <path-to>/memsync-0.1.0.tgz`；使用 nvm 时不要加 `sudo`。
 3. Git 由 Xcode Command Line Tools 提供；SSH 使用系统 ssh-agent。
 
 ### Linux
 
 1. 通过 nvm、fnm 或发行版仓库安装 Node 22+（推荐 24）。
-2. `npm install -g memsync`；若全局目录需要 root，请配置用户级 npm prefix，不要长期使用 sudo。
+2. `npm install -g <path-to>/memsync-0.1.0.tgz`；若全局目录需要 root，请配置用户级 npm prefix，不要长期使用 sudo。
 3. 记忆仓库使用 SSH key 或 credential helper。
 
 ## 2. 初始化、绑定项目
@@ -95,8 +104,11 @@ memsync doctor
 
 ## 4. Codex 集成（路径 A / A2 / B）
 
+> **Windows Codex 0.169 实测 command hooks 不执行**（`SessionStart Failed`，hook 脚本无标记、上下文未注入）。Windows 上请显式使用 `--force-path B`；路径 A/A2 只应在真实 Codex 版本/平台上验证通过后启用。
+
 ```bash
-memsync install --tool codex
+memsync install --tool codex               # 自动探测
+memsync install --tool codex --force-path B  # Windows / 已确认 hooks 不可用
 ```
 
 安装器会用真实的 `codex` 可执行文件做能力探测（隔离的 `CODEX_HOME`，不触碰你的配置）：
@@ -138,16 +150,18 @@ hook: memsync-codex-adapter@SessionStart SessionStart "node" ".../memsync.mjs" h
 memsync run codex -- <codex 参数>
 ```
 
-包装器每次顶层启动都会开始一个全新会话，把 `MEMSYS_SESSION` / `MEMSYS_TOOL` / `MEMSYS_HOST` 导出给子进程，退出时结束会话并写回日志。子进程退出码优先；收尾失败只打印一行诊断。
+包装器每次顶层启动都会开始一个全新会话，把 `MEMSYS_SESSION` / `MEMSYS_TOOL` / `MEMSYS_HOST` / `MEMSYS_WRAPPER` 导出给子进程，并在工作区写入 `.memsync/wrapper-active` 标记（Codex 的 shell 环境策略可能过滤 `MEMSYS_*`，标记供 AI 判断无需重复 sync），退出时结束会话并在沙箱外提交、推送日志。子进程退出码优先；收尾失败只打印一行诊断。
 
 如果直接运行 `codex`（路径 B 的非包装器模式），先执行 `memsync sync --tool codex` 开始会话；之后的 `memsync note` 无需 `--session`，会通过工作区指针归属到该会话。
+
+> Codex 默认 `workspace-write` 沙箱禁止外网，窗口内 `memsync sync`/`git push` 可能超时。推荐用 `memsync run codex`（沙箱外同步/推送）；确需窗口内联网时使用 `codex -s danger-full-access` / `memsync run codex -- -s danger-full-access`。
 
 ## 5. 升级
 
 ```bash
-npm install -g memsync@latest
+npm install -g <path-to>/memsync-0.1.0.tgz
 memsync install --tool claude-code
-memsync install --tool codex
+memsync install --tool codex --force-path B   # Windows
 memsync doctor
 ```
 

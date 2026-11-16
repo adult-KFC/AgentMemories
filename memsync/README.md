@@ -1,11 +1,11 @@
 # MemorySync
 
-让 Claude Code 与 Codex 共享同一份团队记忆：约束、进度、决策、版本与工作日志通过 Git 同步，启动时自动注入有预算上限的上下文，结束时自动写回。无需数据库、常驻服务、MCP 或任何模型 API。
+让 Claude Code 与 Codex 共享同一份团队记忆：约束、进度、决策、版本与工作日志通过 Git 同步，启动时自动注入有预算上限的上下文，结束时自动提交并推送**已经写入的**会话笔记。笔记内容由 AI 或人通过 `memsync note` 写回。无需数据库、常驻服务、MCP 或任何模型 API。
 
 ## 它解决什么问题
 
 - **新机器零上下文**：`init → link → 启动工具` 后，AI 立刻知道团队规范、项目约束、当前版本和正在进行的工作。
-- **写回不靠人肉**：会话开始/结束、笔记、提交统计由 hook 和 CLI 自动记录，按唯一文件名落盘，避免手工合并冲突。
+- **写回有固定落点**：`memsync note` 把笔记写入会话日志，SessionEnd/wrapper 自动提交并推送；笔记内容仍需 AI 或人主动写，提交统计由 Git 自动补齐，按唯一文件名落盘，避免手工合并冲突。
 - **约束可治理**：权威约束只能经 `propose → approve` 修改；直接编辑会被 `verify` 指认。
 - **离线可用**：网络不可用时使用上一次的缓存包继续工作，恢复后自动补推。
 - **双工具一致**：Claude Code 走原生 hooks；Codex 按版本探测 hooks 能力（路径 A/A2），不可用时降级为 `AGENTS.md` + `memsync run codex`（路径 B）。
@@ -44,7 +44,7 @@
 ## 要求
 
 - Node.js **>= 22**（推荐 24，CI 覆盖 22 与 24）。
-- Git 2.30+（Windows 建议 Git for Windows）。
+- Git 2.31+（Windows 建议 Git for Windows）。
 - 对团队记忆仓库的读写权限（SSH 或 HTTPS）。
 
 ## 安装
@@ -79,12 +79,14 @@ memsync --version
 
 ```bash
 # 1. 克隆团队记忆仓库并写入身份
-memsync init --remote git@git.corp.com:team/memory.git(存放记忆的仓库地址) \
+#    把 <memory-repo-url> 替换为团队记忆仓地址
+memsync init --remote <memory-repo-url> \
   --name "你的名字" --email you@corp.com
 
 # 2. 在代码仓库中绑定项目（写 .memsync.json，建议提交）
-cd path/to/checkout-service（需要共同开发的项目地址和名称）
-memsync link checkout-service（共同开发的项目名称）
+#    把路径替换为试点代码仓，checkout-service 替换为项目 slug
+cd path/to/checkout-service
+memsync link checkout-service
 
 # 3. 安装工具集成
 memsync install --tool claude-code
@@ -97,11 +99,13 @@ memsync sync
 
 Codex 的 `install --tool codex` 默认会探测并自动选择 A/A2/B。Windows Codex 0.169 的 command hooks 不可用，因此建议显式使用 `--force-path B`；路径 A/A2 只在经过真实 Codex 验证、command hooks 可用的环境启用。路径 B 下用 `memsync run codex` 启动，wrapper 负责沙箱外的同步与推送。
 
+当前试点配置：记忆仓 `https://github.com/adult-KFC/AgentMemories.git`，代码仓 `https://github.com/adult-KFC/pilot-app.git`，项目 slug `pilot-app`。
+
 `init` 只需要执行一次（换机器时再执行）。`link` 会在工作区写入 `.memsync.json`；把它提交到代码仓库后，队友无需重复指定 slug。
 
 ## 团队首次配置
 
-1. **创建记忆仓库**：新建一个空的 Git 仓库（GitHub / GitLab / 自建均可），给团队授予写权限。仓库内容全部是 Markdown/YAML，不需要任何服务端组件。
+1. **创建记忆仓库**：新建一个私有 Git 仓库（GitHub / GitLab / 自建均可），建议带一个初始提交（例如 README，避免空仓的 unborn branch），给团队授予写权限。仓库内容全部是 Markdown/YAML，不需要任何服务端组件。
 2. **确定 owner**：至少一位项目 owner 的邮箱；owner 才能 `approve` 项目约束。组织级规范（`org/conventions.md`）的 owner 写在 `org/governance.yaml` 的 `owners` 列表。
 3. **创建项目骨架**（由 owner 执行一次）：
 
@@ -127,9 +131,9 @@ Codex 的 `install --tool codex` 默认会探测并自动选择 A/A2/B。Windows
 
 | 场景 | 命令 |
 |---|---|
-| 启动时自动注入上下文 | Claude/Codex hooks 自动调用 `memsync hook ...`；手动执行 `memsync sync` |
+| 启动时自动注入上下文 | Claude hooks 自动调用；Codex 路径 B 由 `memsync run codex` / `AGENTS.md` 触发；也可手动执行 `memsync sync` |
 | 写回进度/决策/阻塞/待办 | `memsync note progress "..."`（自动解析会话；歧义时加 `--session`） |
-| 开始/结束会话 | hooks 自动处理；手动用 `memsync session begin --tool claude-code` / `memsync session end` |
+| 开始/结束会话 | Claude hooks 自动处理；手动用 `memsync session begin --tool claude-code`（Codex 用 `--tool codex`）/ `memsync session end` |
 | 查历史细节 | `memsync recall "关键词"`（默认 5 条、每条 ≤800 字符、总量 ≤4000 字符；`--all` 返回全文） |
 | 团队日报 | `memsync report --since 1d`（也支持 `7d` / ISO 日期） |
 | 改约束 | `memsync propose constraint --title ... --section 禁止 --op add --item "..."`，owner 执行 `memsync approve <id>` |
@@ -138,12 +142,12 @@ Codex 的 `install --tool codex` 默认会探测并自动选择 A/A2/B。Windows
 | 健康检查 | `memsync doctor`、`memsync status` |
 | 维护 | `memsync maintain --check`、`memsync maintain`、`memsync state refresh` |
 
-`note` 默认按 `--session` → `MEMSYS_SESSION`（`CLAUDE_ENV_FILE` 导出，Git Bash: `$MEMSYS_SESSION`，PowerShell: `$env:MEMSYS_SESSION`）→ 工作区指针的顺序解析会话；同一工作区有多个并发会话时必须显式传 `--session`。会话日志记录起止时间、分支、提交列表、diff 统计和笔记；`report` 完全由日志推导，按人分组。
+`note` 默认按 `--session` → `MEMSYS_SESSION`（`CLAUDE_ENV_FILE` 导出，Git Bash: `$MEMSYS_SESSION`，PowerShell: `$env:MEMSYS_SESSION`）→ 工作区指针 → 隐式新建会话的顺序解析；同一工作区有多个并发会话时必须显式传 `--session`。会话日志记录起止时间、分支、提交列表、diff 统计和笔记；`report` 完全由日志推导，按人分组。
 
 ## 安全与隐私
 
 - 不保存对话原文，也不调用任何 LLM；摘要由正在对话的 AI 主动写入。
-- 笔记和提案在落盘前扫描密钥形态（`sk-...`、PEM 私钥、GitHub/AWS token、Bearer token）；命中即拒绝写入。
+- 笔记和提案在落盘前扫描密钥形态（`sk-...`、PEM 私钥、GitHub/AWS token、Bearer token）；笔记命中即拒绝写入，提案中的敏感文本会脱敏为占位符后落盘。
 - 权威文件（`constraints.md`、`org/conventions.md`）通过提案审批修改；审批提交带 `Memsync-Approved-By:` trailer，`verify` 可检测绕过。
 - 记忆仓库的 Git 写权限才是真正的安全边界；owner 校验只用于防误操作。
 
