@@ -1,0 +1,29 @@
+{
+  "name": "memsync",
+  "version": "0.1.0",
+  "description": "Team memory sync CLI for Claude Code and Codex",
+  "type": "module",
+  "bin": {
+    "memsync": "dist/memsync.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "esbuild src/cli.ts --bundle --platform=node --format=esm --alias:yaml=./node_modules/yaml/browser/index.js --outfile=dist/memsync.mjs --banner:js=\"#!/usr/bin/env node\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "vitest run tests/e2e",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "commander": "^15.1.0",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
