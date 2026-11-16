@@ -141,7 +141,7 @@ Claude Code 中可使用 `/memsync-sync` 强制检查最新记忆；它会在 wr
 
 ### 手动提醒 AI 拉取 / 推送
 
-可以直接执行命令，也可以用自然语言提醒 AI；后者依赖受管 `CLAUDE.md` / `AGENTS.md`，明确命令更可靠。
+可以直接执行命令，也可以用自然语言提醒 AI。Claude Code 已实测可用：直接说“先 sync 再回答”“写回后 session end”即可。Codex 路径 B 受沙箱和指令遵循影响，仍建议用 `memsync run codex` 或明确命令。
 
 - 拉取：`memsync sync`（失败回退缓存）或 `memsync sync --strict`（失败直接报错）；Claude Code 可用 `/memsync-sync`。
 - 推送：先 `memsync note ...` 写内容，再 `memsync session end` 提交推送；`note` 本身不推送。

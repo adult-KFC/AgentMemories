@@ -146,7 +146,7 @@ Codex 的 `install --tool codex` 默认会探测并自动选择 A/A2/B。Windows
 
 ## 手动提醒 AI 拉取 / 推送
 
-可以手动执行，也可以用自然语言提醒 AI；后者依赖受管 `CLAUDE.md` / `AGENTS.md` 是否被遵循，**明确写出命令更可靠**。
+可以手动执行，也可以用自然语言提醒 AI。**Claude Code 已实测可用**：直接说“先 sync 再回答”“写回后 session end”即可，AI 会转成对应 CLI 命令。Codex 路径 B 受沙箱和指令遵循影响，仍建议用 `memsync run codex` 或明确命令。
 
 拉取：
 
