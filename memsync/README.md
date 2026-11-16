@@ -144,6 +144,39 @@ Codex 的 `install --tool codex` 默认会探测并自动选择 A/A2/B。Windows
 
 `note` 默认按 `--session` → `MEMSYS_SESSION`（`CLAUDE_ENV_FILE` 导出，Git Bash: `$MEMSYS_SESSION`，PowerShell: `$env:MEMSYS_SESSION`）→ 工作区指针 → 隐式新建会话的顺序解析；同一工作区有多个并发会话时必须显式传 `--session`。会话日志记录起止时间、分支、提交列表、diff 统计和笔记；`report` 完全由日志推导，按人分组。
 
+## 手动提醒 AI 拉取 / 推送
+
+可以手动执行，也可以用自然语言提醒 AI；后者依赖受管 `CLAUDE.md` / `AGENTS.md` 是否被遵循，**明确写出命令更可靠**。
+
+拉取：
+
+```bash
+memsync sync              # 拉取并渲染，失败回退缓存
+memsync sync --strict     # 拉取失败直接报错，不回退缓存
+```
+
+Claude Code 在 `pilot-app` 中还可以用安装生成的 `/memsync-sync`；它会先检查 `.memsync/wrapper-active`，wrapper 模式下不会重复拉取。
+
+推送：
+
+```bash
+memsync note progress "本次完成的内容"
+memsync session end       # 提交并推送；note 本身只写本地
+```
+
+自然语言示例（让 AI 转成上面的命令）：
+
+```text
+先运行 memsync sync --strict，确认记忆是否最新，再回答当前进度。
+把本次结论用 memsync note 写回，然后执行 memsync session end 并确认推送成功。
+```
+
+注意：
+
+- `memsync note` 不会推送，必须 `memsync session end`（或正常结束 Claude 会话触发 SessionEnd hook）。
+- Codex 路径 B 用 `memsync run codex` 启动；默认沙箱窗口内不要反复运行 `memsync sync`，wrapper 会在沙箱外同步/推送。
+- 不要用项目目录的 `git pull` 代替记忆同步：那通常只更新代码仓；记忆仓在 `%USERPROFILE%\.memsync\repo`（macOS/Linux 为 `~/.memsync/repo`）。如果确实手动拉了记忆仓，随后执行 `memsync sync --no-pull` 重新渲染并更新缓存。
+
 ## 安全与隐私
 
 - 不保存对话原文，也不调用任何 LLM；摘要由正在对话的 AI 主动写入。

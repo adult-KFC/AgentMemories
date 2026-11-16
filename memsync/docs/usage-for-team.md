@@ -139,6 +139,19 @@ memsync session end
 
 Claude Code 中可使用 `/memsync-sync` 强制检查最新记忆；它会在 wrapper 模式下跳过重复拉取。
 
+### 手动提醒 AI 拉取 / 推送
+
+可以直接执行命令，也可以用自然语言提醒 AI；后者依赖受管 `CLAUDE.md` / `AGENTS.md`，明确命令更可靠。
+
+- 拉取：`memsync sync`（失败回退缓存）或 `memsync sync --strict`（失败直接报错）；Claude Code 可用 `/memsync-sync`。
+- 推送：先 `memsync note ...` 写内容，再 `memsync session end` 提交推送；`note` 本身不推送。
+- 自然语言示例：
+  ```text
+  先运行 memsync sync --strict，确认记忆是否最新，再回答当前进度。
+  把本次结论用 memsync note 写回，然后执行 memsync session end 并确认推送成功。
+  ```
+- 不要用项目目录的 `git pull` 代替记忆同步：那通常只更新代码仓；记忆仓在 `%USERPROFILE%\.memsync\repo`。
+
 ## 7. 团队约束与决策
 
 核心约束只能通过提案/批准修改：
