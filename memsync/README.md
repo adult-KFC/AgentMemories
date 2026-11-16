@@ -49,20 +49,31 @@
 
 ## 安装
 
+### 方式 A：安装包（推荐给使用者）
+
+从团队记忆仓库获取 `memsync/downloads/memsync-0.1.0.tgz`，然后：
+
 ```bash
-npm install -g memsync
+npm install -g path/to/memsync-0.1.0.tgz
 memsync --version
 ```
 
-从源码安装：
+安装包已经包含打包好的 `dist/memsync.mjs`，不需要 clone 源码，也不需要 `npm run build`。
+
+> `npm install -g memsync` 不适用：当前没有发布到 npm registry。请使用上面的 tgz 路径。
+
+### 方式 B：从源码（开发或修改 CLI）
 
 ```bash
 git clone <this repo>
-cd Agent-memorySync
+cd Agent-memorySync          # 如果从 AgentMemories 克隆，则 cd AgentMemories/memsync
 npm ci
-npm run build
-npm link
+npm run build                # 生成 dist/memsync.mjs
+npm install -g .             # 或 npm link
+memsync --version
 ```
+
+`npm link` 会把全局 `memsync` 链接到当前源码目录，适合开发；修改源码后需要重新 `npm run build`。给同事使用请优先方式 A。
 
 ## 快速开始（每位开发者）
 
